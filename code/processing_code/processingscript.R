@@ -11,14 +11,10 @@ library(here) #to set paths
 
 #path to data
 #note the use of the here() package and not absolute paths
-data_location <- here::here("data","raw_data","exampledata.xlsx")
+data_location <- here::here("data","raw_data","influenza_data.xlsx")
 
-#load data. 
-#note that for functions that come from specific packages (instead of base R)
-# I often specify both package and function like so
-#package::function() that's not required one could just call the function
-#specifying the package makes it clearer where the function "lives",
-#but it adds typing. You can do it either way.
+#load data using readxl
+
 rawdata <- readxl::read_excel(data_location)
 
 #take a look at the data
@@ -28,35 +24,19 @@ dplyr::glimpse(rawdata)
 #that is often not possible.
 print(rawdata)
 
-# looks like we have measurements for height (in centimeters) and weight (in kilogram)
+#I don't want the last column named "Current_Through" and "setting", so i am going to delete them.
+col_del <- select(rawdata, -Current_Through, -Setting)
 
-# there are some problems with the data: 
-# There is an entry which says "sixty" instead of a number. 
-# Does that mean it should be a numeric 60? It somehow doesn't make
-# sense since the weight is 60kg, which can't happen for a 60cm person (a baby)
-# Since we don't know how to fix this, we need to remove the person.
-# This "sixty" entry also turned all Height entries into characters instead of numeric.
-# We need to fix that too.
-# Then there is one person with a height of 6. 
-# that could be a typo, or someone mistakenly entered their height in feet.
-# Since we unfortunately don't know, we'll have to remove this person.
-# similarly, there is a person with weight of 7000, which is impossible,
-# and one person with missing weight.
-# to be able to analyze the data, we'll remove those 5 individuals
+#Also, I want to keep the first 43 rows as it keeps the data for 2019-2020. So I am going to delete rows 44-237.
+row_del <- col_del %>% slice(-c(44:237))
 
-# this is one way of doing it. Note that if the data gets updated, 
-# we need to decide if the thresholds are ok (newborns could be <50)
+#After deletin rows and columns, final data will have 8 columns and 43 rows and put in "processeddata"
+processeddata <- row_del
+View(processeddata)
 
-processeddata <- rawdata %>% dplyr::filter( Height != "sixty" ) %>% 
-                             dplyr::mutate(Height = as.numeric(Height)) %>% 
-                             dplyr::filter(Height > 50 & Weight < 1000)
+#The way I put it here, I want to  make plot MMWR_week_order (x-axis) and Cumulative_Doses (on y axis). That will give us a plot how cumulative dose progressed through weeks.
+#Also, I want to see the total doses (in y axis) over 2019 and 2020 (in x-axis). For that, we have to sum 1-21 column of Doses for 2019, 22-43 column of doses for 2020.
 
-# save data as RDS
-# I suggest you save your processed and cleaned data as RDS or RDA/Rdata files. 
-# This preserves coding like factors, characters, numeric, etc. 
-# If you save as CSV, that information would get lost.
-# See here for some suggestions on how to store your processed data:
-# http://www.sthda.com/english/wiki/saving-data-into-r-data-format-rds-and-rdata
 
 # location to save file
 save_data_location <- here::here("data","processed_data","processeddata.rds")

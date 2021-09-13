@@ -38,17 +38,22 @@ summarytable_file = here("results", "summarytable.rds")
 saveRDS(summary_df, file = summarytable_file)
 
 
-#make a scatterplot of data
+#creates a boxplot with the new categorical variable (Temperature) on the x-axis, and height on the y-axis.
 #we also add a linear regression line to it
-p1 <- mydata %>% ggplot(aes(x=Height, y=Weight)) + geom_point() + geom_smooth(method='lm')
-
+p1 <- ggplot(mydata, aes(x=Temperature, y=Height)) + geom_boxplot() + geom_smooth(method='lm')
 #look at figure
 plot(p1)
-
 #save figure
-figure_file = here("results","resultfigure.png")
-ggsave(filename = figure_file, plot=p1) 
+figure_file1 = here("results","resultfigure1.png")
+ggsave(filename = figure_file1, plot=p1)  
 
+##create another scatterplot with weight on the x-axis and the new numerical variable (Temperature) on the y-axis
+p2 <- ggplot(mydata, aes(x=Weight, y=Temperature, colour ="red")) + geom_point() + geom_smooth(method='lm')
+#look at figure
+plot(p2)
+#save figure
+figure_file2 = here("results","resultfigure2.png")
+ggsave(filename = figure_file2, plot=p2) 
 ######################################
 #Data fitting/statistical analysis
 ######################################
